@@ -32,15 +32,18 @@ const pool = mysql.createPool({
 
 // Endpoint per prendere tutti i contatti
 app.get('/contatti', async (req, res) => {
+  const search = req.query.query || '';
   try {
-    const [rows] = await pool.query('SELECT * FROM contatti');
+    const [rows] = await pool.query(
+      'SELECT * FROM contatti WHERE nome LIKE ? OR email LIKE ?',
+      [%${search}%, %${search}%]
+    );
     res.json(rows);
   } catch (error) {
     console.error('Errore DB:', error);
     res.status(500).json({ error: 'Errore interno del server' });
   }
 });
-
 // Endpoint per aggiungere un contatto
 app.post('/contatti', async (req, res) => {
   const { nome, email, telefono } = req.body;
