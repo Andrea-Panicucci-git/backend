@@ -41,8 +41,9 @@ app.get('/contatti', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Errore DB:', error);
-    res.status(500).json({ error: 'Errore interno del server' });
+    res.status(500).json({ error: 'Errore interno del server', details: error.message });
   }
+
 });
 // Endpoint per aggiungere un contatto
 app.post('/contatti', async (req, res) => {
@@ -50,6 +51,7 @@ app.post('/contatti', async (req, res) => {
   if (!nome || !email || !telefono) {
     return res.status(400).json({ error: 'Nome, email e telefono sono richiesti' });
   }
+  
 
   try {
     const [result] = await pool.query(
@@ -59,7 +61,7 @@ app.post('/contatti', async (req, res) => {
     res.json({ id: result.insertId, nome, email, telefono });
   } catch (error) {
     console.error('Errore DB:', error);
-    res.status(500).json({ error: 'Errore interno del server' });
+    res.status(500).json({ error: 'Errore interno del server', details: error.message });
   }
 });
 
