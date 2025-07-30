@@ -35,6 +35,7 @@ app.get('/contatti', async (req, res) => {
       'SELECT * FROM contatti WHERE nome LIKE ? OR email LIKE ?',
       [`%${search}%`, `%${search}%`]
     );
+
     res.json(rows);
   } catch (error) {
     console.error('Errore DB:', error);
