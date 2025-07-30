@@ -33,7 +33,8 @@ app.get('/contatti', async (req, res) => {
   try {
     const [rows] = await pool.query(
       'SELECT * FROM contatti WHERE nome LIKE ? OR email LIKE ?',
-      ['%${search}%', '%${search}%']
+      [`%${search}%`, `%${search}%`]
+
     );
 
     res.json(rows);
