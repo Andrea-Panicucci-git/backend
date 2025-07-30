@@ -1,0 +1,66 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mysql from 'mysql2/promise';
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Configurazione DB da .env
+const {
+  DB_HOST,
+  DB_USER,
+  DB_PASSWORD,
+  DB_NAME,
+  PORT = 3000
+} = process.env;
+
+// Connessione al DB
+const pool = mysql.createPool({
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Endpoint per prendere tutti i contatti
+app.get('/contatti', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM contatti');
+    res.json(rows);
+  } catch (error) {
+    console.error('Errore DB:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+// Endpoint per aggiungere un contatto
+app.post('/contatti', async (req, res) => {
+  const { nome, email, telefono } = req.body;
+  if (!nome || !email || !telefono) {
+    return res.status(400).json({ error: 'Nome, email e telefono sono richiesti' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO contatti (nome, email, telefono) VALUES (?, ?, ?)',
+      [nome, email, telefono]
+    );
+    res.json({ id: result.insertId, nome, email, telefono });
+  } catch (error) {
+    console.error('Errore DB:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server avviato su http://${DB_HOST}:${PORT}`);
+});
+
