@@ -1,7 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import mysql from 'mysql2/promise';
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const mysql = require('mysql2/promise');
 
 dotenv.config();
 
@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Configurazione DB da .env
 const {
   DB_HOST,
   DB_USER,
@@ -18,7 +17,6 @@ const {
   PORT = 3000
 } = process.env;
 
-// Connessione al DB
 const pool = mysql.createPool({
   host: DB_HOST,
   user: DB_USER,
@@ -30,29 +28,25 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Endpoint per prendere tutti i contatti
 app.get('/contatti', async (req, res) => {
   const search = req.query.query || '';
   try {
     const [rows] = await pool.query(
       'SELECT * FROM contatti WHERE nome LIKE ? OR email LIKE ?',
       [`%${search}%`, `%${search}%`]
-
     );
     res.json(rows);
   } catch (error) {
     console.error('Errore DB:', error);
     res.status(500).json({ error: 'Errore interno del server', details: error.message });
   }
-
 });
-// Endpoint per aggiungere un contatto
+
 app.post('/contatti', async (req, res) => {
   const { nome, email, telefono } = req.body;
   if (!nome || !email || !telefono) {
     return res.status(400).json({ error: 'Nome, email e telefono sono richiesti' });
   }
-  
 
   try {
     const [result] = await pool.query(
@@ -67,6 +61,5 @@ app.post('/contatti', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server avviato su http://${DB_HOST}:${PORT}`);
+  console.log(`Server avviato su http://localhost:${PORT}`);
 });
-
